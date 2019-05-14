@@ -4,20 +4,46 @@ import 'package:flutter/widgets.dart';
 import 'package:proathlete_athleteslist_mockup/athlete.dart';
 import 'package:rxdart/rxdart.dart';
 
-class InheritedAthleteListBloc extends InheritedWidget {
+class AthleteListBlocProvider extends InheritedWidget {
   final AthleteListBloc bloc;
 
-  InheritedAthleteListBloc(this.bloc, Widget child) : super (child: child);
+  AthleteListBlocProvider(this.bloc, Widget child) : super (child: child);
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => true;
 
-  static InheritedAthleteListBloc of(BuildContext context) =>
-      context.inheritFromWidgetOfExactType(InheritedAthleteListBloc);
+  static AthleteListBlocProvider of(BuildContext context) =>
+      context.inheritFromWidgetOfExactType(AthleteListBlocProvider);
 }
 
 class AthleteListBloc {
-  static List<Athlete> _athletes = <Athlete>[
+  final Sink<Athlete> addAthlete;
+
+  final Stream<List<Athlete>> athletes;
+
+  final List<StreamSubscription<dynamic>> _subscriptions;
+
+  factory AthleteListBloc(DumbAthleteReactiveRepository repository) {
+    // ignore: close_sinks
+    final addAthleteController = StreamController<Athlete>(sync: true);
+
+    final subscriptions = <StreamSubscription<dynamic>>[
+      addAthleteController.stream.listen(repository.addAthlete),
+    ];
+
+    return AthleteListBloc._(addAthleteController.sink, repository.athletes, subscriptions);
+  }
+
+  AthleteListBloc._(this.addAthlete, this.athletes, this._subscriptions);
+
+  void close() {
+    addAthlete.close();
+    _subscriptions.forEach((subscription) => subscription.cancel());
+  }
+}
+
+class DumbAthleteReactiveRepository {
+  static List<Athlete> _initialAthletes = <Athlete>[
     Athlete("Атлет 1", 174),
     Athlete("Атлет 2", 165),
     Athlete("Атлет 3", 165),
@@ -27,41 +53,18 @@ class AthleteListBloc {
     Athlete("Атлет 7", 165),
     Athlete("Атлет 8", 165),
     Athlete("Атлет 9", 165),
-    Athlete("Атлет 10", 165),
-    Athlete("Атлет 11", 165),
-    Athlete("Try Tryumen", 0),
   ];
 
-  final _athletesSubject = BehaviorSubject<List<Athlete>>();
+  final BehaviorSubject<List<Athlete>> _subject;
 
-  Stream<List<Athlete>> get athletes => _athletesSubject.stream;
+  DumbAthleteReactiveRepository()
+    : _subject =  BehaviorSubject.seeded(_initialAthletes);
 
-
-  final Sink<Athlete> createAthlete;
-
-  factory AthleteListBloc() {
-    // ignore: close_sinks
-    final createAthleteController = StreamController<Athlete>(sync: true);
-
-    // ignore: cancel_subscriptions
-    StreamSubscription<dynamic> createAthleteSubscription =
-        createAthleteController.stream.listen(_addAthleteListener);
-
-    return AthleteListBloc._(createAthleteController, createAthleteSubscription);
+  void addAthlete(Athlete a) {
+    _subject.add(<Athlete>[]
+        ..addAll(_subject.value ?? [])
+        ..add(a));
   }
 
-  AthleteListBloc._(this.createAthlete, this._createAthleteStreamSubscription) {
-    _athletesSubject.add(_athletes);
-  }
-
-  static void _addAthleteListener(Athlete a) {
-    _athletes.add(a);
-  }
-
-  void close() {
-    createAthlete.close();
-    _createAthleteStreamSubscription.cancel();
-  }
-
-  final StreamSubscription<dynamic> _createAthleteStreamSubscription;
+  Stream<List<Athlete>> get athletes => _subject.stream;
 }

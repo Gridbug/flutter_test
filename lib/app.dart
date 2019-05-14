@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
       title: 'Проатлет 2.0',
       theme: ThemeData(
           primarySwatch: Colors.grey, scaffoldBackgroundColor: Colors.white),
-      home: InheritedAthleteListBloc(AthleteListBloc(), AthletesListScreen()),
+      home: AthleteListBlocProvider(AthleteListBloc(DumbAthleteReactiveRepository()), AthletesListScreen()),
       color: Colors.white,
     );
   }

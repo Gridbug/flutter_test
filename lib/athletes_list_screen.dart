@@ -22,12 +22,15 @@ class AthletesListScreen extends StatelessWidget {
               onPressed: () {
                 Future<Athlete> newAthlete = showDialog(
                     context: context, builder: (context) => AddAthleteDialog());
-                
+
                 newAthlete.then((athlete) {
                   if (athlete != null) {
-                    InheritedAthleteListBloc.of(context).bloc.createAthlete.add(athlete);
+                    AthleteListBlocProvider.of(context)
+                        .bloc
+                        .addAthlete
+                        .add(athlete);
                   }
-                } );
+                });
               }),
           IconButton(
             icon: ImageIcon(AssetImage('assets/search.png')),
@@ -35,13 +38,14 @@ class AthletesListScreen extends StatelessWidget {
               showSearch(
                   context: context,
                   delegate: AthleteSearch(
-                      InheritedAthleteListBloc.of(context).bloc.athletes));
+                      AthleteListBlocProvider.of(context).bloc.athletes));
             },
           ),
         ],
       ),
-      body: StreamBuilder(
-        stream: InheritedAthleteListBloc.of(context).bloc.athletes,
+      body: StreamBuilder<List<Athlete>>(
+        stream: AthleteListBlocProvider.of(context).bloc.athletes,
+        initialData: [],
         builder: (context, snapshot) => _buildAthletesList(snapshot.data),
       ),
     );
@@ -104,6 +108,8 @@ class AthletesListScreen extends StatelessWidget {
 class AthleteSearch extends SearchDelegate<Athlete> {
   final Stream<List<Athlete>> _athletesStream;
 
+  AthleteSearch(this._athletesStream);
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -130,6 +136,7 @@ class AthleteSearch extends SearchDelegate<Athlete> {
   Widget buildResults(BuildContext context) {
     return StreamBuilder<List<Athlete>>(
         stream: _athletesStream,
+        initialData: [],
         builder: (context, snapshot) => ListView(
               children: snapshot.data
                   .where((athlete) =>
@@ -158,6 +165,7 @@ class AthleteSearch extends SearchDelegate<Athlete> {
   Widget buildSuggestions(BuildContext context) {
     return StreamBuilder<List<Athlete>>(
         stream: _athletesStream,
+        initialData: [],
         builder: (context, snapshot) => ListView(
               children: snapshot.data
                   .where((athlete) =>
@@ -175,8 +183,6 @@ class AthleteSearch extends SearchDelegate<Athlete> {
                   .toList(),
             ));
   }
-
-  AthleteSearch(this._athletesStream);
 }
 
 class AddAthleteDialog extends SimpleDialog {

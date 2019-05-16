@@ -7,7 +7,7 @@ import 'package:rxdart/rxdart.dart';
 class AthleteListBlocProvider extends InheritedWidget {
   final AthleteListBloc bloc;
 
-  AthleteListBlocProvider(this.bloc, Widget child) : super (child: child);
+  AthleteListBlocProvider(this.bloc, Widget child) : super(child: child);
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => true;
@@ -18,8 +18,11 @@ class AthleteListBlocProvider extends InheritedWidget {
 
 class AthleteListBloc {
   final Sink<Athlete> addAthlete;
+  final Sink<String> updateFilter;
 
   final Stream<List<Athlete>> athletes;
+  final Stream<String> activeFilter;
+  final Stream<List<Athlete>> filteredAthletes;
 
   final List<StreamSubscription<dynamic>> _subscriptions;
 
@@ -27,18 +30,40 @@ class AthleteListBloc {
     // ignore: close_sinks
     final addAthleteController = StreamController<Athlete>(sync: true);
 
+    // ignore: close_sinks
+    final updateFilterController =
+        BehaviorSubject<String>.seeded("", sync: true);
+
+    final filteredAthletesController = BehaviorSubject<List<Athlete>>();
+
     final subscriptions = <StreamSubscription<dynamic>>[
       addAthleteController.stream.listen(repository.addAthlete),
     ];
 
-    return AthleteListBloc._(addAthleteController.sink, repository.athletes, subscriptions);
+    Observable.combineLatest2(repository.athletes,
+            updateFilterController.stream, _filter_athletes)
+        .pipe(filteredAthletesController);
+
+    return AthleteListBloc._(
+        addAthleteController.sink,
+        updateFilterController.sink,
+        repository.athletes,
+        updateFilterController.stream,
+        filteredAthletesController.stream,
+        subscriptions);
   }
 
-  AthleteListBloc._(this.addAthlete, this.athletes, this._subscriptions);
+  AthleteListBloc._(this.addAthlete, this.updateFilter, this.athletes,
+      this.activeFilter, this.filteredAthletes, this._subscriptions);
 
   void close() {
     addAthlete.close();
+    updateFilter.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
+  }
+
+  static List<Athlete> _filter_athletes(List<Athlete> athletes, String filter) {
+    return athletes.where((athlete) => athlete.name.contains(filter)).toList();
   }
 }
 
@@ -58,12 +83,12 @@ class DumbAthleteReactiveRepository {
   final BehaviorSubject<List<Athlete>> _subject;
 
   DumbAthleteReactiveRepository()
-    : _subject =  BehaviorSubject.seeded(_initialAthletes);
+      : _subject = BehaviorSubject.seeded(_initialAthletes);
 
   void addAthlete(Athlete a) {
     _subject.add(<Athlete>[]
-        ..addAll(_subject.value ?? [])
-        ..add(a));
+      ..addAll(_subject.value ?? [])
+      ..add(a));
   }
 
   Stream<List<Athlete>> get athletes => _subject.stream;

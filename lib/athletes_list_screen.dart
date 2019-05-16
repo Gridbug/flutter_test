@@ -43,10 +43,44 @@ class AthletesListScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: StreamBuilder<List<Athlete>>(
-        stream: AthleteListBlocProvider.of(context).bloc.athletes,
-        initialData: [],
-        builder: (context, snapshot) => _buildAthletesList(snapshot.data),
+      body: Column(
+        children: <Widget>[
+          AnimatedContainer(
+            duration: Duration(seconds: 2),
+            color: ProathleteColors.graySeparationLine,
+            child: Row(
+              children: <Widget>[
+                IconButton(
+                  padding: EdgeInsets.all(0),
+                  onPressed: () {},
+                  icon: Icon(Icons.search),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                ),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration.collapsed(),
+                    onChanged: (text) { AthleteListBlocProvider.of(context).bloc.updateFilter.add(text); },
+                )
+                ),
+                IconButton(
+                  padding: EdgeInsets.all(0),
+                  icon: Icon(Icons.close),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  onPressed: () {},
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<List<Athlete>>(
+              stream: AthleteListBlocProvider.of(context).bloc.filteredAthletes,
+              initialData: [],
+              builder: (context, snapshot) => _buildAthletesList(snapshot.data),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -231,7 +265,8 @@ class AddAthleteDialog extends SimpleDialog {
                 Navigator.of(context).pop(null);
               },
             ),
-            Text('Новый атлет', style: TextStyle(color: Colors.white)),
+            Text('Новый атлет',
+                style: TextStyle(color: Colors.white, fontSize: 14)),
             FlatButton(
               child: Text('Готово', style: TextStyle(color: Colors.white)),
               onPressed: () {

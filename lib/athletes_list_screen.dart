@@ -2,8 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:proathlete_athleteslist_mockup/athlete.dart';
 import 'package:proathlete_athleteslist_mockup/athlete_list_bloc.dart';
 import 'package:proathlete_athleteslist_mockup/proathlete_colors.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
-class AthletesListScreen extends StatelessWidget {
+class AthletesListScreen extends StatefulWidget {
+  @override
+  _AthletesListScreenState createState() => _AthletesListScreenState();
+}
+
+class _AthletesListScreenState extends State<AthletesListScreen> {
+  double _searchBarHeight = 0;
+  bool _searchBarVisible = false;
+  final _searchController = TextEditingController();
+  var _appBarSearchButtonColor = Colors.black;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,44 +44,70 @@ class AthletesListScreen extends StatelessWidget {
                   }
                 });
               }),
-          IconButton(
-            icon: ImageIcon(AssetImage('assets/search.png')),
-            onPressed: () {
-              showSearch(
-                  context: context,
-                  delegate: AthleteSearch(
-                      AthleteListBlocProvider.of(context).bloc.athletes));
-            },
+          AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            child: IconButton(
+              icon: ImageIcon(AssetImage('assets/search.png')),
+              color: _appBarSearchButtonColor,
+              onPressed: () {
+//              showSearch(
+//                  context: context,
+//                  delegate: AthleteSearch(
+//                      AthleteListBlocProvider.of(context).bloc.athletes));
+
+                _searchController.clear();
+                FocusScope.of(context).requestFocus(
+                    FocusNode()); //MUST BE CHANGED TO "FocusScope.of(context).unfocus()" in Flutter 1.5.9
+
+                if (_searchBarVisible) {
+                  setState(() {
+                    _searchBarVisible = false;
+                    _searchBarHeight = 0;
+                    _appBarSearchButtonColor = Colors.black;
+                  });
+                } else {
+                  setState(() {
+                    _searchBarVisible = true;
+                    _searchBarHeight = 30;
+                    _appBarSearchButtonColor = ProathleteColors.orange;
+                  });
+                }
+              },
+            ),
           ),
         ],
       ),
       body: Column(
         children: <Widget>[
           AnimatedContainer(
-            duration: Duration(seconds: 2),
+            duration: Duration(milliseconds: 300),
             color: ProathleteColors.graySeparationLine,
+            height: _searchBarHeight,
             child: Row(
               children: <Widget>[
-                IconButton(
-                  padding: EdgeInsets.all(0),
-                  onPressed: () {},
-                  icon: Icon(Icons.search),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                ),
                 Expanded(
                   child: TextField(
-                    decoration: InputDecoration.collapsed(),
-                    onChanged: (text) { AthleteListBlocProvider.of(context).bloc.updateFilter.add(text); },
-                )
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.search),
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent,
+                      ),
+                    ),
+                    controller: _searchController,
+                    onChanged: (text) {
+                      AthleteListBlocProvider.of(context)
+                          .bloc
+                          .updateFilter
+                          .add(text);
+                    },
+                  ),
                 ),
-                IconButton(
-                  padding: EdgeInsets.all(0),
-                  icon: Icon(Icons.close),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onPressed: () {},
-                )
               ],
             ),
           ),
@@ -237,6 +275,7 @@ class AddAthleteDialog extends SimpleDialog {
   String _height = '';
   String _weight = '';
   String _contraindications = '';
+  File _athletePhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +318,125 @@ class AddAthleteDialog extends SimpleDialog {
       children: <Widget>[
         Row(
           children: <Widget>[
-            Padding(
+            AthletePhoto(),
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    decoration: InputDecoration(
+                        labelText: 'Имя',
+                        border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: ProathleteColors.f4f4f4))),
+                    onChanged: (name) => _name = name,
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    decoration: InputDecoration(
+                        labelText: 'Фамилия',
+                        border: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: ProathleteColors.f4f4f4))),
+                    onChanged: (surname) => _surname = surname,
+                  )
+                ],
+                mainAxisSize: MainAxisSize.max,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+              labelText: 'День рождения',
+              suffixIcon: Image(
+                image: AssetImage('assets/datepicker.png'),
+              ),
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
+          controller: _birthDateController,
+        ),
+        SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+              labelText: 'Пол',
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
+          controller: _genderController,
+        ),
+        SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+              labelText: 'E-mail',
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
+          controller: _emailController,
+        ),
+        SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+            labelText: 'Телефон',
+            border: OutlineInputBorder(
+                borderSide: BorderSide(color: ProathleteColors.f4f4f4)),
+          ),
+          controller: _phoneController,
+        ),
+        SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+              labelText: 'Рост',
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
+          controller: _heightController,
+        ),
+        SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+              labelText: 'Вес',
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
+          controller: _weightController,
+        ),
+        SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+              labelText: 'Противопоказания',
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
+          controller: _contraindicationsController,
+        ),
+      ],
+    );
+  }
+}
+
+class AthletePhoto extends StatefulWidget {
+  @override
+  _AthletePhotoState createState() => _AthletePhotoState();
+}
+
+class _AthletePhotoState extends State<AthletePhoto> {
+  File _athletePhoto;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() async {
+          _athletePhoto =
+              await ImagePicker.pickImage(source: ImageSource.gallery);
+        });
+      },
+      child: _athletePhoto != null
+          ? Container(
+              padding: EdgeInsets.all(20),
+              child: Image(image: FileImage(_athletePhoto)),
+              width: 80,
+              decoration:
+                  BoxDecoration(borderRadius: BorderRadius.circular(80)),
+            )
+          : Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: <Widget>[
@@ -299,93 +456,6 @@ class AddAthleteDialog extends SimpleDialog {
                 mainAxisSize: MainAxisSize.max,
               ),
             ),
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    decoration: InputDecoration(
-                        labelText: 'Имя',
-                        border: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: ProathleteColors.f4f4f4))),
-                    onChanged: (name) => _name = name,
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    decoration: InputDecoration(
-                        labelText: 'Фамилия',
-                        border: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: ProathleteColors.f4f4f4))),
-                    onChanged: (surname) => _surname = surname,
-                  )
-                ],
-                mainAxisSize: MainAxisSize.max,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 20),
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'День рождения',
-              suffixIcon: Image(
-                image: AssetImage('assets/datepicker.png'),
-              ),
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: _birthDateController,
-        ),
-        SizedBox(height: 20),
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'Пол',
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: _genderController,
-        ),
-        SizedBox(height: 20),
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'E-mail',
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: _emailController,
-        ),
-        SizedBox(height: 20),
-        TextField(
-          decoration: InputDecoration(
-            labelText: 'Телефон',
-            border: OutlineInputBorder(
-                borderSide: BorderSide(color: ProathleteColors.f4f4f4)),
-          ),
-          controller: _phoneController,
-        ),
-        SizedBox(height: 20),
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'Рост',
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: _heightController,
-        ),
-        SizedBox(height: 20),
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'Вес',
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: _weightController,
-        ),
-        SizedBox(height: 20),
-        TextField(
-          decoration: InputDecoration(
-              labelText: 'Противопоказания',
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: _contraindicationsController,
-        ),
-      ],
     );
   }
 }

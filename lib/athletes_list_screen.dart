@@ -65,6 +65,11 @@ class _AthletesListScreenState extends State<AthletesListScreen> {
                     _searchBarHeight = 0;
                     _appBarSearchButtonColor = Colors.black;
                   });
+
+                  AthleteListBlocProvider.of(context)
+                      .bloc
+                      .updateFilter
+                      .add("");
                 } else {
                   setState(() {
                     _searchBarVisible = true;
@@ -91,24 +96,26 @@ class _AthletesListScreenState extends State<AthletesListScreen> {
                       border: InputBorder.none,
 //                      prefixIcon: Icon(Icons.search),
                       prefixIcon: ImageIcon(AssetImage("assets/search.png")),
-                      suffixIcon: FlatButton(
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        child: ImageIcon(
-                          AssetImage("assets/x.png"),
-                        ),
+                      suffixIcon: Container(
+                        child: FlatButton(
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          child: ImageIcon(
+                            AssetImage("assets/x.png"),
+                          ),
 //                        icon: Icon(Icons.clear),
-                        onPressed: () {
-                          setState(() {
-                            _searchController.clear();
+                          onPressed: () {
+                            setState(() {
+                              _searchController.clear();
 
-                            AthleteListBlocProvider.of(context)
-                                .bloc
-                                .updateFilter
-                                .add(_searchController.text);
-                          });
-                        },
-//                        highlightColor: Colors.transparent,
-//                        splashColor: Colors.transparent,
+                              AthleteListBlocProvider.of(context)
+                                  .bloc
+                                  .updateFilter
+                                  .add(_searchController.text);
+                            });
+                          },
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                        ),
                       ),
                     ),
                     controller: _searchController,
@@ -188,86 +195,6 @@ class _AthletesListScreenState extends State<AthletesListScreen> {
       children: athleteCards,
       padding: const EdgeInsets.all(20),
     );
-  }
-}
-
-class AthleteSearch extends SearchDelegate<Athlete> {
-  final Stream<List<Athlete>> _athletesStream;
-
-  AthleteSearch(this._athletesStream);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      )
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, Athlete("Nobody", 0, null));
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return StreamBuilder<List<Athlete>>(
-        stream: _athletesStream,
-        initialData: [],
-        builder: (context, snapshot) => ListView(
-              children: snapshot.data
-                  .where((athlete) =>
-                      athlete.name.toLowerCase().contains(query.toLowerCase()))
-                  .map<ListTile>((athlete) => ListTile(
-                        leading: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: AssetImage(
-                                  'assets/user_photo_placeholder.png'),
-                            ),
-                          ),
-                          child: SizedBox.fromSize(size: Size.square(32)),
-                        ),
-                        title: Text(athlete.name),
-                        onTap: () {
-                          close(context, athlete);
-                        },
-                      ))
-                  .toList(),
-            ));
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return StreamBuilder<List<Athlete>>(
-        stream: _athletesStream,
-        initialData: [],
-        builder: (context, snapshot) => ListView(
-              children: snapshot.data
-                  .where((athlete) =>
-                      athlete.name.toLowerCase().contains(query.toLowerCase()))
-                  .map<ListTile>((athlete) => ListTile(
-                        title: Text(
-                          athlete.name,
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                        dense: true,
-                        onTap: () {
-                          close(context, athlete);
-                        },
-                      ))
-                  .toList(),
-            ));
   }
 }
 
@@ -504,3 +431,83 @@ class _AthletePhotoState extends State<AthletePhoto> {
     );
   }
 }
+
+//class AthleteSearch extends SearchDelegate<Athlete> {
+//  final Stream<List<Athlete>> _athletesStream;
+//
+//  AthleteSearch(this._athletesStream);
+//
+//  @override
+//  List<Widget> buildActions(BuildContext context) {
+//    return [
+//      IconButton(
+//        icon: Icon(Icons.clear),
+//        onPressed: () {
+//          query = '';
+//        },
+//      )
+//    ];
+//  }
+//
+//  @override
+//  Widget buildLeading(BuildContext context) {
+//    return IconButton(
+//      icon: Icon(Icons.arrow_back),
+//      onPressed: () {
+//        close(context, Athlete("Nobody", 0, null));
+//      },
+//    );
+//  }
+//
+//  @override
+//  Widget buildResults(BuildContext context) {
+//    return StreamBuilder<List<Athlete>>(
+//        stream: _athletesStream,
+//        initialData: [],
+//        builder: (context, snapshot) => ListView(
+//              children: snapshot.data
+//                  .where((athlete) =>
+//                      athlete.name.toLowerCase().contains(query.toLowerCase()))
+//                  .map<ListTile>((athlete) => ListTile(
+//                        leading: Container(
+//                          decoration: BoxDecoration(
+//                            shape: BoxShape.circle,
+//                            image: DecorationImage(
+//                              image: AssetImage(
+//                                  'assets/user_photo_placeholder.png'),
+//                            ),
+//                          ),
+//                          child: SizedBox.fromSize(size: Size.square(32)),
+//                        ),
+//                        title: Text(athlete.name),
+//                        onTap: () {
+//                          close(context, athlete);
+//                        },
+//                      ))
+//                  .toList(),
+//            ));
+//  }
+//
+//  @override
+//  Widget buildSuggestions(BuildContext context) {
+//    return StreamBuilder<List<Athlete>>(
+//        stream: _athletesStream,
+//        initialData: [],
+//        builder: (context, snapshot) => ListView(
+//              children: snapshot.data
+//                  .where((athlete) =>
+//                      athlete.name.toLowerCase().contains(query.toLowerCase()))
+//                  .map<ListTile>((athlete) => ListTile(
+//                        title: Text(
+//                          athlete.name,
+//                          style: TextStyle(color: Colors.blue),
+//                        ),
+//                        dense: true,
+//                        onTap: () {
+//                          close(context, athlete);
+//                        },
+//                      ))
+//                  .toList(),
+//            ));
+//  }
+//}

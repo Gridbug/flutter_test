@@ -293,18 +293,24 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
   Widget build(BuildContext context) {
     return SimpleDialog(
       contentPadding: EdgeInsets.fromLTRB(8, 0, 8, 4),
-      titlePadding: EdgeInsets.fromLTRB(0, 4, 0, 4),
+      titlePadding: EdgeInsets.fromLTRB(0, 0, 0, 4),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+        borderRadius: BorderRadius.all(Radius.circular(4)),
 //        side: BorderSide(
 //          width: 10,
 //          color: Colors.red
 //        )
       ),
       title: Container(
-        color: ProathleteColors.violet,
         padding: EdgeInsets.all(0),
         margin: EdgeInsets.all(0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(4),
+            topRight: Radius.circular(4),
+          ),
+          color: ProathleteColors.violet,
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[

@@ -69,15 +69,15 @@ class AthleteListBloc {
 
 class DumbAthleteReactiveRepository {
   static List<Athlete> _initialAthletes = <Athlete>[
-    Athlete("Атлет 1", 174),
-    Athlete("Атлет 2", 165),
-    Athlete("Атлет 3", 165),
-    Athlete("Атлет 4", 165),
-    Athlete("Атлет 5", 165),
-    Athlete("Атлет 6", 165),
-    Athlete("Атлет 7", 165),
-    Athlete("Атлет 8", 165),
-    Athlete("Атлет 9", 165),
+    Athlete("Атлет 1", 174, null),
+    Athlete("Атлет 2", 165, null),
+    Athlete("Атлет 3", 165, null),
+    Athlete("Атлет 4", 165, null),
+    Athlete("Атлет 5", 165, null),
+    Athlete("Атлет 6", 165, null),
+    Athlete("Атлет 7", 165, null),
+    Athlete("Атлет 8", 165, null),
+    Athlete("Атлет 9", 165, null),
   ];
 
   final BehaviorSubject<List<Athlete>> _subject;

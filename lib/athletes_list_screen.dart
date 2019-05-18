@@ -89,14 +89,26 @@ class _AthletesListScreenState extends State<AthletesListScreen> {
                   child: TextField(
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      prefixIcon: Icon(Icons.search),
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.clear),
+//                      prefixIcon: Icon(Icons.search),
+                      prefixIcon: ImageIcon(AssetImage("assets/search.png")),
+                      suffixIcon: FlatButton(
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        child: ImageIcon(
+                          AssetImage("assets/x.png"),
+                        ),
+//                        icon: Icon(Icons.clear),
                         onPressed: () {
-                          _searchController.clear();
+                          setState(() {
+                            _searchController.clear();
+
+                            AthleteListBlocProvider.of(context)
+                                .bloc
+                                .updateFilter
+                                .add(_searchController.text);
+                          });
                         },
-                        highlightColor: Colors.transparent,
-                        splashColor: Colors.transparent,
+//                        highlightColor: Colors.transparent,
+//                        splashColor: Colors.transparent,
                       ),
                     ),
                     controller: _searchController,
@@ -260,6 +272,11 @@ class AthleteSearch extends SearchDelegate<Athlete> {
 }
 
 class AddAthleteDialog extends StatefulWidget {
+  @override
+  _AddAthleteDialogState createState() => _AddAthleteDialogState();
+}
+
+class _AddAthleteDialogState extends State<AddAthleteDialog> {
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
   final _birthDateController = TextEditingController();
@@ -270,11 +287,6 @@ class AddAthleteDialog extends StatefulWidget {
   final _weightController = TextEditingController();
   final _contraindicationsController = TextEditingController();
 
-  @override
-  _AddAthleteDialogState createState() => _AddAthleteDialogState();
-}
-
-class _AddAthleteDialogState extends State<AddAthleteDialog> {
   File _athletePhotoFile;
 
   @override
@@ -293,7 +305,6 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
         color: ProathleteColors.violet,
         padding: EdgeInsets.all(0),
         margin: EdgeInsets.all(0),
-
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
@@ -311,15 +322,15 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
             FlatButton(
               child: Text('Готово', style: TextStyle(color: Colors.white)),
               onPressed: () {
-                String _name = widget._nameController.text;
-                String _surname = widget._surnameController.text;
-                String _birthDate = widget._birthDateController.text;
-                String _gender = widget._genderController.text;
-                String _email = widget._emailController.text;
-                String _phone = widget._phoneController.text;
-                String _height = widget._heightController.text;
-                String _weight = widget._weightController.text;
-                String _contraindications = widget._contraindicationsController.text;
+                String _name = _nameController.text;
+                String _surname = _surnameController.text;
+                String _birthDate = _birthDateController.text;
+                String _gender = _genderController.text;
+                String _email = _emailController.text;
+                String _phone = _phoneController.text;
+                String _height = _heightController.text;
+                String _weight = _weightController.text;
+                String _contraindications = _contraindicationsController.text;
 
                 Navigator.of(context)
                     .pop(Athlete(_name, 42, _athletePhotoFile));
@@ -338,7 +349,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
               child: Column(
                 children: <Widget>[
                   TextField(
-                    controller: widget._nameController,
+                    controller: _nameController,
                     decoration: InputDecoration(
                       labelText: 'Имя',
                       border: OutlineInputBorder(
@@ -348,7 +359,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
                   ),
                   SizedBox(height: 10),
                   TextField(
-                    controller: widget._surnameController,
+                    controller: _surnameController,
                     decoration: InputDecoration(
                       labelText: 'Фамилия',
                       border: OutlineInputBorder(
@@ -371,7 +382,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
               ),
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: widget._birthDateController,
+          controller: _birthDateController,
         ),
         SizedBox(height: 10),
         TextField(
@@ -379,7 +390,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
               labelText: 'Пол',
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: widget._genderController,
+          controller: _genderController,
         ),
         SizedBox(height: 10),
         TextField(
@@ -387,7 +398,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
               labelText: 'E-mail',
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: widget._emailController,
+          controller: _emailController,
         ),
         SizedBox(height: 10),
         TextField(
@@ -396,7 +407,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
             border: OutlineInputBorder(
                 borderSide: BorderSide(color: ProathleteColors.f4f4f4)),
           ),
-          controller: widget._phoneController,
+          controller: _phoneController,
         ),
         SizedBox(height: 10),
         TextField(
@@ -404,7 +415,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
               labelText: 'Рост',
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: widget._heightController,
+          controller: _heightController,
         ),
         SizedBox(height: 10),
         TextField(
@@ -412,7 +423,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
               labelText: 'Вес',
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: widget._weightController,
+          controller: _weightController,
         ),
         SizedBox(height: 10),
         TextField(
@@ -420,7 +431,7 @@ class _AddAthleteDialogState extends State<AddAthleteDialog> {
               labelText: 'Противопоказания',
               border: OutlineInputBorder(
                   borderSide: BorderSide(color: ProathleteColors.f4f4f4))),
-          controller: widget._contraindicationsController,
+          controller: _contraindicationsController,
         ),
       ],
     );

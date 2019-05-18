@@ -422,10 +422,11 @@ class _AthletePhotoState extends State<AthletePhoto> {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
-        setState(() async {
-          _athletePhoto =
-              await ImagePicker.pickImage(source: ImageSource.gallery);
+      onTap: () async {
+        File imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+        setState(() {
+          _athletePhoto = imageFile;
         });
       },
       child: _athletePhoto != null

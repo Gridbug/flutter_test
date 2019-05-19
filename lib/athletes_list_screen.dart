@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+
 import 'package:proathlete_athleteslist_mockup/add_athlete_dialog.dart';
 import 'package:proathlete_athleteslist_mockup/athlete.dart';
 import 'package:proathlete_athleteslist_mockup/athlete_list_bloc.dart';
 import 'package:proathlete_athleteslist_mockup/proathlete_colors.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:proathlete_athleteslist_mockup/trainer_profile_screen.dart';
 
 class AthletesListScreen extends StatefulWidget {
   @override
@@ -24,27 +24,39 @@ class _AthletesListScreenState extends State<AthletesListScreen> {
         backgroundColor: ProathleteColors.graySeparationLine,
         elevation: 0,
         leading: IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              print('Menu button pressed!');
-            }),
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            print('Menu button pressed!');
+          },
+        ),
         title: Text('Атлеты'),
         actions: <Widget>[
           IconButton(
-              icon: ImageIcon(AssetImage('assets/add_athlete.png')),
-              onPressed: () {
-                Future<Athlete> newAthlete = showDialog(
-                    context: context, builder: (context) => AddAthleteDialog());
+            icon: Icon(Icons.call_missed_outgoing),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) {
+                  return TrainerProfileScreen();
+                },
+              ));
+            },
+          ),
+          IconButton(
+            icon: ImageIcon(AssetImage('assets/add_athlete.png')),
+            onPressed: () {
+              Future<Athlete> newAthlete = showDialog(
+                  context: context, builder: (context) => AddAthleteDialog());
 
-                newAthlete.then((athlete) {
-                  if (athlete != null) {
-                    AthleteListBlocProvider.of(context)
-                        .bloc
-                        .addAthlete
-                        .add(athlete);
-                  }
-                });
-              }),
+              newAthlete.then((athlete) {
+                if (athlete != null) {
+                  AthleteListBlocProvider.of(context)
+                      .bloc
+                      .addAthlete
+                      .add(athlete);
+                }
+              });
+            },
+          ),
           AnimatedContainer(
             duration: Duration(milliseconds: 300),
             child: IconButton(
@@ -67,10 +79,7 @@ class _AthletesListScreenState extends State<AthletesListScreen> {
                     _appBarSearchButtonColor = Colors.black;
                   });
 
-                  AthleteListBlocProvider.of(context)
-                      .bloc
-                      .updateFilter
-                      .add("");
+                  AthleteListBlocProvider.of(context).bloc.updateFilter.add("");
                 } else {
                   setState(() {
                     _searchBarVisible = true;
@@ -99,7 +108,8 @@ class _AthletesListScreenState extends State<AthletesListScreen> {
                       prefixIcon: ImageIcon(AssetImage("assets/search.png")),
                       suffixIcon: Container(
                         child: FlatButton(
-                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                           child: ImageIcon(
                             AssetImage("assets/x.png"),
                           ),

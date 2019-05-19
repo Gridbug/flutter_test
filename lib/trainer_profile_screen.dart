@@ -4,7 +4,7 @@ import 'package:proathlete_athleteslist_mockup/proathlete_colors.dart';
 class TrainerProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text('Мой профиль'),
         backgroundColor: ProathleteColors.graySeparationLine,
@@ -82,7 +82,7 @@ class TrainerProfileScreen extends StatelessWidget {
                               BorderSide(color: ProathleteColors.f4f4f4)),
                       suffix: Text(
                         "Не подтверждён",
-                        style: TextStyle(color: ProathleteColors.orange),
+                        style: TextStyle(color: ProathleteColors.orange, fontSize: 10),
                       )),
 //                          controller: _phoneController,
                 ),
